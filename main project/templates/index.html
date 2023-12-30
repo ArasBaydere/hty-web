@@ -1,0 +1,78 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hty test</title>
+    <!-- Yandex Maps API kütüphanesi -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=254f8898-d4c3-483b-98d6-6c4be1eed78f&lang=en_US" type="text/javascript"></script>
+
+    <!-- Dışarıdan alınan latitude ve longitude değerlerini burada tanımla -->
+    <script>
+        var latitude = {{ latitude }};
+        var longitude = {{ longitude }};
+    </script>
+
+    <style>
+        /* Sayfanın tamamını kaplayacak şekilde harita alanı boyutları */
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Harita alanı -->
+    <div id="map"></div>
+
+    <!-- JavaScript ile konum verisini alıp haritada işaretleme -->
+    <script src="{{ url_for('static', filename='coordinates.js') }}"></script>
+    <script>
+        ymaps.ready(init);
+        function init(){
+            // Ekranın ortasındaki koordinatları al
+            var center = [latitude, longitude];
+
+            // Haritanın genişliği ve yüksekliği
+            var mapWidth = window.innerWidth;
+            var mapHeight = window.innerHeight;
+
+            // Haritanın ortalanmış bir şekilde başlatılması
+            var myMap = new ymaps.Map("map", {
+                center: center,
+                zoom: 7,
+                controls: []  // İsteğe bağlı: Harita üzerinde kontrol düğmelerini kaldırmak için
+            }, {
+                // Haritanın genişliği ve yüksekliğini ayarla
+                suppressMapOpenBlock: true,
+                suppressObsoleteBrowserNotifier: true,
+                yandexMapDisablePoiInteractivity: true,
+                avoidFractionalZoom: false,
+                viewportMargin: mapWidth > 500 ? 80 : 0,  // Sayfa genişliğine bağlı olarak kenar boşluğu ayarla
+                projectionStretchFactor: mapWidth > 500 ? 1 : 2
+            });
+
+            // Harita boyutunu sayfa boyutuna uygun olarak ayarla
+            myMap.container.fitToViewport();
+
+            // Sayfa boyutu değiştiğinde haritayı tekrar boyutlandır
+            window.addEventListener('resize', function () {
+                myMap.container.fitToViewport();
+            });
+
+            // Placemark (İmleç) oluştur
+            var placemark = new ymaps.Placemark(center, {
+                hintContent: 'Bu nokta işaretlendi'  // İmlec üzerine gelindiğinde gösterilecek içerik
+            });
+
+            // Placemark'i haritaya ekle
+            myMap.geoObjects.add(placemark);
+        }
+    </script>
+</body>
+</html>
